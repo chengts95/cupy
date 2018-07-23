@@ -2,8 +2,7 @@ import numpy
 import six
 
 import cupy
-from cupy.core import core
-from cupy.sparse import util
+from cupyx.scipy.sparse import util
 
 
 class spmatrix(object):
@@ -147,8 +146,8 @@ class spmatrix(object):
             other (int): Exponent.
 
         Returns:
-            cupy.sparse.spmatrix: A sparse matrix representing n-th power of
-                this matrix.
+            cupyx.scipy.sparse.spmatrix: A sparse matrix representing n-th
+                power of this matrix.
 
         """
         m, n = self.shape
@@ -161,7 +160,9 @@ class spmatrix(object):
                 raise ValueError('exponent must be >= 0')
 
             if other == 0:
-                return cupy.sparse.identity(m, dtype=self.dtype, format='csr')
+                import cupyx.scipy.sparse
+                return cupyx.scipy.sparse.identity(
+                    m, dtype=self.dtype, format='csr')
             elif other == 1:
                 return self.copy()
             else:
@@ -179,8 +180,8 @@ class spmatrix(object):
     def A(self):
         """Dense ndarray representation of this matrix.
 
-        This property is equivalent to :meth:`~cupy.sparse.spmatrix.toarray`
-        method.
+        This property is equivalent to
+        :meth:`~cupyx.scipy.sparse.spmatrix.toarray` method.
 
         """
         return self.toarray()
@@ -231,7 +232,7 @@ class spmatrix(object):
         Otherwise it makes a copy with floating point type and the same format.
 
         Returns:
-            cupy.sparse.spmatrix: A matrix with float type.
+            cupyx.scipy.sparse.spmatrix: A matrix with float type.
 
         """
         if self.dtype.kind == 'f':
@@ -247,7 +248,7 @@ class spmatrix(object):
             t: Type specifier.
 
         Returns:
-            cupy.sparse.spmatrix:
+            cupyx.scipy.sparse.spmatrix:
                 A copy of the array with the given type and the same format.
 
         """
@@ -413,15 +414,12 @@ def issparse(x):
     """Checks if a given matrix is a sparse matrix.
 
     Returns:
-        bool: Returns if ``x`` is :class:`cupy.sparse.spmatrix` that is a base
-            class of all sparse matrix classes.
+        bool: Returns if ``x`` is :class:`cupyx.scipy.sparse.spmatrix` that is
+            a base class of all sparse matrix classes.
 
     """
     return isinstance(x, spmatrix)
 
 
+isdense = util.isdense
 isspmatrix = issparse
-
-
-def isdense(x):
-    return isinstance(x, core.ndarray)

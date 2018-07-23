@@ -1,7 +1,7 @@
 # distutils: language = c++
 
-cimport cpython
-cimport cython
+cimport cpython  # NOQA
+cimport cython  # NOQA
 
 
 @cython.profile(False)
@@ -222,3 +222,15 @@ cpdef tuple complete_slice_list(list slice_list, Py_ssize_t ndim):
     elif n > 0:
         slice_list += [slice(None)] * n
     return slice_list, n_newaxes
+
+
+@cython.profile(False)
+cpdef size_t clp2(size_t x):
+    x -= 1
+    x |= x >> 1
+    x |= x >> 2
+    x |= x >> 4
+    x |= x >> 8
+    x |= x >> 16
+    x |= x >> 32
+    return x + 1

@@ -1,4 +1,8 @@
 import cupy
+from cupyx.scipy.sparse import coo
+from cupyx.scipy.sparse import csc
+from cupyx.scipy.sparse import csr
+from cupyx.scipy.sparse import dia
 
 
 def eye(m, n=None, k=0, dtype='d', format=None):
@@ -13,7 +17,7 @@ def eye(m, n=None, k=0, dtype='d', format=None):
         format (str or None): Format of the result, e.g. ``format="csr"``.
 
     Returns:
-        cupy.sparse.spmatrix: Created sparse matrix.
+        cupyx.scipy.sparse.spmatrix: Created sparse matrix.
 
     .. seealso:: :func:`scipy.sparse.eye`
 
@@ -28,16 +32,16 @@ def eye(m, n=None, k=0, dtype='d', format=None):
             indices = cupy.arange(n, dtype='i')
             data = cupy.ones(n, dtype=dtype)
             if format == 'csr':
-                cls = cupy.sparse.csr_matrix
+                cls = csr.csr_matrix
             else:
-                cls = cupy.sparse.csc_matrix
+                cls = csc.csc_matrix
             return cls((data, indices, indptr), (n, n))
 
         elif format == 'coo':
             row = cupy.arange(n, dtype='i')
             col = cupy.arange(n, dtype='i')
             data = cupy.ones(n, dtype=dtype)
-            return cupy.sparse.coo_matrix((data, (row, col)), (n, n))
+            return coo.coo_matrix((data, (row, col)), (n, n))
 
     diags = cupy.ones((1, max(0, min(m + k, n))), dtype=dtype)
     return spdiags(diags, k, m, n).asformat(format)
@@ -55,7 +59,7 @@ def identity(n, dtype='d', format=None):
         format (str or None): Format of the result, e.g. ``format="csr"``.
 
     Returns:
-        cupy.sparse.spmatrix: Created identity matrix.
+        cupyx.scipy.sparse.spmatrix: Created identity matrix.
 
     .. seealso:: :func:`scipy.sparse.identity`
 
@@ -74,12 +78,12 @@ def spdiags(data, diags, m, n, format=None):
         format (str or None): Sparse format, e.g. ``format="csr"``.
 
     Returns:
-        cupy.sparse.spmatrix: Created sparse matrix.
+        cupyx.scipy.sparse.spmatrix: Created sparse matrix.
 
     .. seealso:: :func:`scipy.sparse.spdiags`
 
     """
-    return cupy.sparse.dia_matrix((data, diags), shape=(m, n)).asformat(format)
+    return dia.dia_matrix((data, diags), shape=(m, n)).asformat(format)
 
 
 def random(m, n, density=0.01, format='coo', dtype=None,
@@ -107,7 +111,7 @@ def random(m, n, density=0.01, format='coo', dtype=None,
             If it is not given, `random_state.rand` is used.
 
     Returns:
-        cupy.sparse.spmatrix: Generated matrix.
+        cupyx.scipy.sparse.spmatrix: Generated matrix.
 
     .. seealso:: :func:`scipy.sparse.random`
 
@@ -134,14 +138,14 @@ def random(m, n, density=0.01, format='coo', dtype=None,
     j = cupy.floor(ind * (1. / m)).astype('i')
     i = ind - j * m
     vals = data_rvs(k).astype(dtype)
-    return cupy.sparse.coo_matrix(
+    return coo.coo_matrix(
         (vals, (i, j)), shape=(m, n)).asformat(format)
 
 
 def rand(m, n, density=0.01, format='coo', dtype=None, random_state=None):
     """Generates a random sparse matrix.
 
-    See :func:`cupy.sparse.random` for detail.
+    See :func:`cupyx.scipy.sparse.random` for detail.
 
     Args:
         m (int): Number of rows.
@@ -157,10 +161,10 @@ def rand(m, n, density=0.01, format='coo', dtype=None, random_state=None):
             This state is used to generate random indexes for nonzero entries.
 
     Returns:
-        cupy.sparse.spmatrix: Generated matrix.
+        cupyx.scipy.sparse.spmatrix: Generated matrix.
 
     .. seealso:: :func:`scipy.sparse.rand`
-    .. seealso:: :func:`cupy.sparse.random`
+    .. seealso:: :func:`cupyx.scipy.sparse.random`
 
     """
     return random(m, n, density, format, dtype, random_state)

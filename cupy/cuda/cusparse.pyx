@@ -1,4 +1,4 @@
-cimport cython
+cimport cython  # NOQA
 
 from cupy.cuda cimport driver
 from cupy.cuda cimport stream as stream_module
@@ -439,6 +439,22 @@ class CuSparseError(RuntimeError):
 cpdef inline check_status(int status):
     if status != 0:
         raise CuSparseError(status)
+
+
+@cython.profile(False)
+cdef inline cuComplex complex_to_cuda(complex value):
+    cdef cuComplex value_cuda
+    value_cuda.x = value.real
+    value_cuda.y = value.imag
+    return value_cuda
+
+
+@cython.profile(False)
+cdef inline cuDoubleComplex double_complex_to_cuda(double complex value):
+    cdef cuDoubleComplex value_cuda
+    value_cuda.x = value.real
+    value_cuda.y = value.imag
+    return value_cuda
 
 
 ########################################
@@ -1077,26 +1093,42 @@ cpdef dnnz_compress(
 cpdef cnnz_compress(
         size_t handle, int m, size_t descr,
         size_t values, size_t rowPtr, size_t nnzPerRow,
+<<<<<<< HEAD
         cuComplex tol):
+=======
+        complex tol):
+>>>>>>> 426b08d062a2656d327549e683dc4b1bfd7736a3
     cdef int nnz_total
     setStream(handle, stream_module.get_current_stream_ptr())
     status = cusparseCnnz_compress(
         <Handle>handle, m, <const MatDescr>descr,
         <const cuComplex *>values, <const int *>rowPtr, <int *>nnzPerRow,
+<<<<<<< HEAD
         &nnz_total, tol)
+=======
+        &nnz_total, complex_to_cuda(tol))
+>>>>>>> 426b08d062a2656d327549e683dc4b1bfd7736a3
     check_status(status)
     return nnz_total
 
 cpdef znnz_compress(
         size_t handle, int m, size_t descr,
         size_t values, size_t rowPtr, size_t nnzPerRow,
+<<<<<<< HEAD
         cuDoubleComplex tol):
+=======
+        double complex tol):
+>>>>>>> 426b08d062a2656d327549e683dc4b1bfd7736a3
     cdef int nnz_total
     setStream(handle, stream_module.get_current_stream_ptr())
     status = cusparseZnnz_compress(
         <Handle>handle, m, <const MatDescr>descr,
         <const cuDoubleComplex *>values, <const int *>rowPtr, <int *>nnzPerRow,
+<<<<<<< HEAD
         &nnz_total, tol)
+=======
+        &nnz_total, double_complex_to_cuda(tol))
+>>>>>>> 426b08d062a2656d327549e683dc4b1bfd7736a3
     check_status(status)
     return nnz_total
 
@@ -1131,27 +1163,43 @@ cpdef ccsr2csr_compress(
         size_t handle, int m, int n, size_t descrA,
         size_t inVal, size_t inColInd, size_t inRowPtr,
         int inNnz, size_t nnzPerRow, size_t outVal, size_t outColInd,
+<<<<<<< HEAD
         size_t outRowPtr, cuComplex tol):
+=======
+        size_t outRowPtr, complex tol):
+>>>>>>> 426b08d062a2656d327549e683dc4b1bfd7736a3
     setStream(handle, stream_module.get_current_stream_ptr())
     status = cusparseCcsr2csr_compress(
         <Handle>handle, m, n, <MatDescr>descrA,
         <const cuComplex *>inVal, <const int *>inColInd, <const int *>inRowPtr,
         inNnz, <int *>nnzPerRow, <cuComplex *>outVal, <int *>outColInd,
+<<<<<<< HEAD
         <int *>outRowPtr, tol)
+=======
+        <int *>outRowPtr, complex_to_cuda(tol))
+>>>>>>> 426b08d062a2656d327549e683dc4b1bfd7736a3
     check_status(status)
 
 cpdef zcsr2csr_compress(
         size_t handle, int m, int n, size_t descrA,
         size_t inVal, size_t inColInd, size_t inRowPtr,
         int inNnz, size_t nnzPerRow, size_t outVal, size_t outColInd,
+<<<<<<< HEAD
         size_t outRowPtr, cuDoubleComplex tol):
+=======
+        size_t outRowPtr, double complex tol):
+>>>>>>> 426b08d062a2656d327549e683dc4b1bfd7736a3
     setStream(handle, stream_module.get_current_stream_ptr())
     status = cusparseZcsr2csr_compress(
         <Handle>handle, m, n, <MatDescr>descrA,
         <const cuDoubleComplex *>inVal, <const int *>inColInd,
         <const int *>inRowPtr,
         inNnz, <int *>nnzPerRow, <cuDoubleComplex *>outVal, <int *>outColInd,
+<<<<<<< HEAD
         <int *>outRowPtr, tol)
+=======
+        <int *>outRowPtr, double_complex_to_cuda(tol))
+>>>>>>> 426b08d062a2656d327549e683dc4b1bfd7736a3
     check_status(status)
 
 cpdef sdense2csc(

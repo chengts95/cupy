@@ -33,6 +33,7 @@ original error: {}'''.format(exc_info[1]))  # NOQA
 
 
 from cupy import cuda
+import cupyx
 
 
 def is_available():
@@ -498,7 +499,6 @@ from cupy.math.window import blackman  # NOQA
 from cupy.math.window import hamming  # NOQA
 from cupy.math.window import hanning  # NOQA
 
-
 from cupy.core.fusion import exp  # NOQA
 from cupy.core.fusion import exp2  # NOQA
 from cupy.core.fusion import expm1  # NOQA
@@ -509,6 +509,9 @@ from cupy.core.fusion import log2  # NOQA
 from cupy.core.fusion import logaddexp  # NOQA
 from cupy.core.fusion import logaddexp2  # NOQA
 
+from cupy.core.fusion import i0  # NOQA
+from cupy.core.fusion import sinc  # NOQA
+
 from cupy.core.fusion import copysign  # NOQA
 from cupy.core.fusion import frexp  # NOQA
 from cupy.core.fusion import ldexp  # NOQA
@@ -517,6 +520,7 @@ from cupy.core.fusion import signbit  # NOQA
 
 from cupy.core.fusion import add  # NOQA
 from cupy.core.fusion import divide  # NOQA
+from cupy.core.fusion import divmod  # NOQA
 from cupy.core.fusion import floor_divide  # NOQA
 from cupy.core.fusion import fmod  # NOQA
 from cupy.core.fusion import modf  # NOQA
@@ -572,6 +576,9 @@ from cupy.sorting.sort import sort  # NOQA
 # -----------------------------------------------------------------------------
 # Statistics
 # -----------------------------------------------------------------------------
+from cupy.statistics.correlation import corrcoef  # NOQA
+from cupy.statistics.correlation import cov  # NOQA
+
 from cupy.core.fusion import amax  # NOQA
 from cupy.core.fusion import amax as max  # NOQA
 from cupy.core.fusion import amin  # NOQA
@@ -601,14 +608,18 @@ from cupy.util import clear_memo  # NOQA
 from cupy.util import memoize  # NOQA
 
 from cupy.core import ElementwiseKernel  # NOQA
+from cupy.core import RawKernel  # NOQA
 from cupy.core import ReductionKernel  # NOQA
 
+# -----------------------------------------------------------------------------
+# DLPack
+# -----------------------------------------------------------------------------
+
+from cupy.core import fromDlpack  # NOQA
 
 # The following function is left for backward compatibility.
 # New CuPy specific routines should reside in cupyx package.
 from cupy.ext.scatter import scatter_add  # NOQA
-
-import cupyx
 
 
 def asnumpy(a, stream=None):
@@ -658,6 +669,8 @@ def get_array_module(*args):
 
     """
     for arg in args:
+        if isinstance(arg, fusion.FusionVarPython):
+            return fusion
         if isinstance(arg, (ndarray, sparse.spmatrix)):
             return _cupy
     return numpy

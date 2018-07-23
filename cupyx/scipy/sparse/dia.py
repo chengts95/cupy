@@ -6,8 +6,8 @@ except ImportError:
 
 import cupy
 from cupy import core
-from cupy.sparse import csc
-from cupy.sparse import data
+from cupyx.scipy.sparse import csc
+from cupyx.scipy.sparse import data
 
 
 class dia_matrix(data._data_matrix):
@@ -128,7 +128,7 @@ class dia_matrix(data._data_matrix):
                 arrays in a matrix cannot be shared in dia to csc conversion.
 
         Returns:
-            cupy.sparse.csc_matrix: Converted matrix.
+            cupyx.scipy.sparse.csc_matrix: Converted matrix.
 
         """
         if self.data.size == 0:
@@ -145,7 +145,7 @@ class dia_matrix(data._data_matrix):
             int offset_inds = i % offset_len;
             row = offset_inds - offsets;
             mask = (row >= 0 && row < num_rows && offset_inds < num_cols
-                    && data != 0);
+                    && data != T(0));
             ''',
             'dia_tocsc')(offset_len, self.offsets[:, None], num_rows,
                          num_cols, self.data)
@@ -166,7 +166,7 @@ class dia_matrix(data._data_matrix):
                 arrays in a matrix cannot be shared in dia to csr conversion.
 
         Returns:
-            cupy.sparse.csc_matrix: Converted matrix.
+            cupyx.scipy.sparse.csc_matrix: Converted matrix.
 
         """
         return self.tocsc().tocsr()
@@ -176,7 +176,7 @@ def isspmatrix_dia(x):
     """Checks if a given matrix is of DIA format.
 
     Returns:
-        bool: Returns if ``x`` is :class:`cupy.sparse.dia_matrix`.
+        bool: Returns if ``x`` is :class:`cupyx.scipy.sparse.dia_matrix`.
 
     """
     return isinstance(x, dia_matrix)

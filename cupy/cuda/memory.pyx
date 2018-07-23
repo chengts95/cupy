@@ -1,4 +1,6 @@
 # distutils: language = c++
+cimport cython
+
 import atexit
 import collections
 import ctypes
@@ -34,6 +36,7 @@ class OutOfMemoryError(MemoryError):
         super(OutOfMemoryError, self).__init__(msg)
 
 
+@cython.no_gc
 cdef class Memory:
     """Memory allocation on a CUDA device.
 
@@ -485,6 +488,7 @@ cpdef set_allocator(allocator=None):
     _current_allocator = allocator
 
 
+@cython.no_gc
 cdef class PooledMemory(Memory):
 
     """Memory allocation for a memory pool.
@@ -797,6 +801,11 @@ cdef class SingleDeviceMemoryPool:
                     _compact_index(self, stream_ptr, False)
                 break
         finally:
+            # clear references to chunks from local variables
+            # so that errorMemoryAllocation cases in the following section
+            # can cudaFree() the chunks by gc.collect().
+            arena = None
+            free_list = None
             rlock.unlock_fastrlock(self._free_lock)
 
         if chunk is not None:
