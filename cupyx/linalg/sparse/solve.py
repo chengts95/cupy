@@ -4,42 +4,36 @@ import cupy
 from cupy import cuda
 from cupy.cuda import device
 from cupy.linalg import util
-import cupyx.scipy.sparse
+import cupy.sparse
 
 
 if cuda.cusolver_enabled:
     from cupy.cuda import cusolver
 
 
-def lsqr(A, b):
-    """Solves linear system with QR decomposition.
+def lschol(A, b):
+    """Solves linear system with cholesky decomposition.
 
     Find the solution to a large, sparse, linear system of equations.
     The function solves ``Ax = b``. Given two-dimensional matrix ``A`` is
-    decomposed into ``Q * R``.
+    decomposed into ``L * L^*``.
 
     Args:
-        A (cupy.ndarray or cupyx.scipy.sparse.csr_matrix): The input matrix
-            with dimension ``(N, N)``
+        A (cupy.ndarray or cupy.sparse.csr_matrix): The input matrix with
+            dimension ``(N, N)``. Must be positive-definite input matrix.
+            Only symmetric real matrix is supported currently.
         b (cupy.ndarray): Right-hand side vector.
 
     Returns:
-        tuple:
-            Its length must be ten. It has same type elements
-            as SciPy. Only the first element, the solution vector ``x``, is
-            available and other elements are expressed as ``None`` because
-            the implementation of cuSOLVER is different from the one of SciPy.
-            You can easily calculate the fourth element by ``norm(b - Ax)``
-            and the ninth element by ``norm(x)``.
+        ret (cupy.ndarray): The solution vector ``x``.
 
-    .. seealso:: :func:`scipy.sparse.linalg.lsqr`
     """
 
     if not cuda.cusolver_enabled:
         raise RuntimeError('Current cupy only supports cusolver in CUDA 8.0')
 
-    if not cupyx.scipy.sparse.isspmatrix_csr(A):
-        A = cupyx.scipy.sparse.csr_matrix(A)
+    if not cupy.sparse.isspmatrix_csr(A):
+        A = cupy.sparse.csr_matrix(A)
     util._assert_nd_squareness(A)
     util._assert_cupy_array(b)
     m = A.shape[0]
@@ -60,15 +54,15 @@ def lsqr(A, b):
     singularity = numpy.empty(1, numpy.int32)
 
     if dtype == 'f':
-        csrlsvqr = cusolver.scsrlsvqr
+        csrlsvchol = cusolver.scsrlsvchol
     else:
-        csrlsvqr = cusolver.dcsrlsvqr
-    csrlsvqr(
+        csrlsvchol = cusolver.dcsrlsvchol
+    csrlsvchol(
         handle, m, nnz, A._descr.descriptor, A.data.data.ptr,
         A.indptr.data.ptr, A.indices.data.ptr, b.data.ptr, tol, reorder,
         x.data.ptr, singularity.ctypes.data)
 
-    # The return type of SciPy is always float64. Therefore, x must be casted.
+    # The return type of SciPy is always float64. 
     x = x.astype(numpy.float64)
-    ret = (x, None, None, None, None, None, None, None, None, None)
-    return ret
+
+    return x
